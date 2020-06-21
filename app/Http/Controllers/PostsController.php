@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Intervention\Image\Facades\Image;
@@ -15,6 +16,15 @@ class PostsController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+    }
+
+    public function index(){
+        //pluck() sherben per me e marr vetem field qe i zgjedh te objektit/ve
+        $users = auth()->user()->following()->pluck('profiles.user_id');
+        //with('user') ne mnyr qe mos me u bo load i user cdo here per cdo post (n+1 problem)
+        $posts = Post::whereIn('user_id',$users)->with('user')->latest()->paginate(5);
+
+        return view('posts.index', compact('posts'));
     }
 
     public function create()
